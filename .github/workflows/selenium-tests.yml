@@ -26,6 +26,8 @@ jobs:
           cache: maven
 
       - name: Run Selenium Tests
+        id: selenium-tests
+        continue-on-error: true
         run: mvn clean test
 
       - name: Upload Test Reports
@@ -37,3 +39,7 @@ jobs:
             test-output/
             target/
             screenshots/
+
+      - name: Mark workflow as failed if tests failed
+        if: steps.selenium-tests.outcome == 'failure'
+        run: exit 1
