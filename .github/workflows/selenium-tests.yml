@@ -43,14 +43,16 @@ jobs:
 
           curl -X POST \
             -H "Content-Type: application/json" \
-            -d "{
-              \"project\": \"selenium-testng-automation\",
-              \"status\": \"$STATUS\",
-              \"test\": \"LoginTest\",
-              \"message\": \"$MESSAGE\"
-              \"run_url\": \"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
-            }" \
-            "${{ secrets.N8N_WEBHOOK_URL }}"
+            --data @- \
+            "${{ secrets.N8N_WEBHOOK_URL }}" <<EOF
+          {
+            "project": "selenium-testng-automation",
+            "status": "$STATUS",
+            "test": "LoginTest",
+            "message": "$MESSAGE",
+            "run_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          }
+          EOF
 
       - name: Upload Test Reports
         if: always()
