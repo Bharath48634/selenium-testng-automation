@@ -26,9 +26,28 @@ jobs:
           cache: maven
 
       - name: Run Selenium Tests
-        id: selenium-tests
-        continue-on-error: true
         run: mvn clean test
+
+      - name: Send Test Result to n8n
+        if: always()
+        run: |
+          if [ "${{ steps.selenium_tests.outcome }}" = "success" ]; then
+            STATUS="success"
+            MESSAGE="All Selenium tests passed"
+          else
+            STATUS="failure"
+            MESSAGE="Selenium tests failed in GitHub Actions"
+          fi
+
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"project\": \"selenium-testng-automation\",
+              \"status\": \"$STATUS\",
+              \"test\": \"LoginTest\",
+              \"message\": \"$MESSAGE\"
+            }" \
+            "${{ secrets.N8N_WEBHOOK_URL }}"
 
       - name: Upload Test Reports
         if: always()
